@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+  labels:
+    name: app
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    name: argocd
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress
+  labels:
+    name: ingress
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+  labels:
+    name: logging
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    name: cert-manager
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gatekeeper-system
+  labels:
+    name: gatekeeper-system
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sealed-secrets
+  labels:
+    name: sealed-secrets
+    team: platform
+    managed-by: argocd
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubecost
+  labels:
+    name: kubecost
+    team: platform
+    managed-by: argocd
