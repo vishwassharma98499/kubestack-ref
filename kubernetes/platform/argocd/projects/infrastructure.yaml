@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+  labels:
+    team: platform
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Platform infrastructure components (monitoring, ingress, security, etc.)"
+  sourceRepos:
+    - "https://github.com/vishwassharma98499/kubestack-ref.git"
+    - "https://argoproj.github.io/argo-helm"
+    - "https://prometheus-community.github.io/helm-charts"
+    - "https://aws.github.io/eks-charts"
+    - "https://kubernetes-sigs.github.io/external-dns"
+    - "https://charts.jetstack.io"
+    - "https://bitnami-labs.github.io/sealed-secrets"
+    - "https://open-policy-agent.github.io/gatekeeper/charts"
+    - "https://kubecost.github.io/cost-analyzer"
+    - "https://fluent.github.io/helm-charts"
+  destinations:
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: true

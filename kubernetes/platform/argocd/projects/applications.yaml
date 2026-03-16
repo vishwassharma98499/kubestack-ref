@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: applications
+  namespace: argocd
+  labels:
+    team: platform
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Application workloads deployed to the cluster"
+  sourceRepos:
+    - "https://github.com/vishwassharma98499/kubestack-ref.git"
+    - "https://github.com/vishwassharma98499/*"
+  destinations:
+    - namespace: app
+      server: https://kubernetes.default.svc
+  # Applications are restricted to namespace-scoped resources only
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: apps
+      kind: Deployment
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: bitnami.com
+      kind: SealedSecret
+  orphanedResources:
+    warn: true
