@@ -1,0 +1,124 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubestack-ref-alerts
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    team: platform
+    release: prometheus-stack
+spec:
+  groups:
+    # ── Pod Health ──────────────────────────────
+    - name: pod-health
+      rules:
+        - alert: PodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 15 > 3
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+            description: "Pod has restarted more than 3 times in the last 15 minutes."
+            runbook_url: "https://github.com/vishwassharma98499/kubestack-ref/blob/main/docs/RUNBOOK.md#pod-crash-looping"
+
+        - alert: PodNotReady
+          expr: kube_pod_status_ready{condition="true"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is not ready"
+            description: "Pod has been in a non-ready state for more than 10 minutes."
+
+    # ── Resource Usage ─────────────────────────
+    - name: resource-usage
+      rules:
+        - alert: HighCPUUsage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{container!="",container!="POD"}[5m])) by (namespace, pod) /
+            sum(kube_pod_container_resource_limits{resource="cpu"}) by (namespace, pod) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} CPU > 90%"
+            description: "Pod is using more than 90% of its CPU limit for 10+ minutes."
+
+        - alert: HighMemoryUsage
+          expr: |
+            sum(container_memory_working_set_bytes{container!="",container!="POD"}) by (namespace, pod) /
+            sum(kube_pod_container_resource_limits{resource="memory"}) by (namespace, pod) > 0.9
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} memory > 90%"
+            description: "Pod is using more than 90% of its memory limit for 10+ minutes."
+
+        - alert: NodeCPUPressure
+          expr: avg(1 - rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance) > 0.85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node {{ $labels.instance }} CPU utilization > 85%"
+            description: "Consider scaling the node group or optimizing workloads."
+
+    # ── HTTP Errors ────────────────────────────
+    - name: http-errors
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            sum(rate(http_requests_total{namespace="app",status_code=~"5.."}[5m])) /
+            sum(rate(http_requests_total{namespace="app"}[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "5xx error rate > 5% in the app namespace"
+            description: "More than 5% of requests are returning 5xx errors."
+            runbook_url: "https://github.com/vishwassharma98499/kubestack-ref/blob/main/docs/RUNBOOK.md#high-error-rate"
+
+        - alert: HighLatency
+          expr: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="app"}[5m])) by (le)) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "p95 latency > 2s in the app namespace"
+            description: "95th percentile request latency exceeds 2 seconds."
+
+    # ── Certificate Expiry ─────────────────────
+    - name: certificate-health
+      rules:
+        - alert: CertificateExpiringSoon
+          expr: certmanager_certificate_expiration_timestamp_seconds - time() < 30 * 24 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires within 30 days"
+            description: "Check cert-manager logs and ensure the ClusterIssuer is working."
+
+        - alert: CertificateExpiryCritical
+          expr: certmanager_certificate_expiration_timestamp_seconds - time() < 7 * 24 * 3600
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires within 7 days"
+            description: "Immediate action required — certificate renewal may have failed."
+
+    # ── Persistent Volume ──────────────────────
+    - name: storage
+      rules:
+        - alert: PersistentVolumeAlmostFull
+          expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }} is > 85% full"
+            description: "Consider expanding the volume or cleaning up data."
