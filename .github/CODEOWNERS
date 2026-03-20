@@ -1,0 +1,6 @@
+# Platform team owns all infrastructure
+terraform/      @vishwassharma98499/platform-team
+kubernetes/     @vishwassharma98499/platform-team
+.github/        @vishwassharma98499/platform-team
+scripts/        @vishwassharma98499/platform-team
+docs/           @vishwassharma98499/platform-team

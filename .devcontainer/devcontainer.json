@@ -1,0 +1,36 @@
+{
+  "name": "kubestack-ref",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "helm": "latest",
+      "kubectl": "latest",
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.6.6"
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.22"
+    }
+  },
+  "postCreateCommand": "curl -sL https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=v5.6.3 bash && echo '✅ Ready! Run: make demo'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "golang.go"
+      ]
+    }
+  },
+  "forwardPorts": [8080, 9080, 3000, 9090],
+  "portsAttributes": {
+    "8080": { "label": "Sample API", "onAutoForward": "notify" },
+    "9080": { "label": "ArgoCD UI", "onAutoForward": "notify" },
+    "3000": { "label": "Grafana", "onAutoForward": "notify" },
+    "9090": { "label": "Prometheus", "onAutoForward": "notify" }
+  }
+}
