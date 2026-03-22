@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: health-dashboard
+  namespace: app
+  labels:
+    app: health-dashboard
+    team: platform
+spec:
+  type: ClusterIP
+  selector:
+    app: health-dashboard
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

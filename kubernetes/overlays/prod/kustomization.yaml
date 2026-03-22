@@ -1,0 +1,104 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ──────────────────────────────────────────────
+# Prod Overlay
+# - 3 replicas for high availability
+# - Warn-level logging (reduce noise)
+# - Larger resource limits for production traffic
+# - Strict PDB (minAvailable: 2)
+# ──────────────────────────────────────────────
+
+namespace: app
+
+resources:
+  - ../../apps/sample-api
+
+commonLabels:
+  environment: prod
+
+patches:
+  # Scale to 3 replicas with production resources
+  - target:
+      kind: Deployment
+      name: sample-api
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sample-api
+      spec:
+        replicas: 3
+        template:
+          spec:
+            containers:
+              - name: sample-api
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 128Mi
+                  limits:
+                    cpu: 500m
+                    memory: 512Mi
+            # Enforce pod anti-affinity in prod
+            affinity:
+              podAntiAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                  - labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - sample-api
+                    topologyKey: kubernetes.io/hostname
+
+  # HPA: scale 3–10 in prod
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: sample-api
+    patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: sample-api
+      spec:
+        minReplicas: 3
+        maxReplicas: 10
+        metrics:
+          - type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 60
+          - type: Resource
+            resource:
+              name: memory
+              target:
+                type: Utilization
+                averageUtilization: 70
+
+  # PDB: at least 2 pods must remain available during disruptions
+  - target:
+      kind: PodDisruptionBudget
+      name: sample-api
+    patch: |
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: sample-api
+      spec:
+        minAvailable: 2
+
+  # ConfigMap: warn-level logging, prod environment
+  - target:
+      kind: ConfigMap
+      name: sample-api-config
+    patch: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: sample-api-config
+      data:
+        APP_ENV: "production"
+        LOG_LEVEL: "warn"

@@ -1,0 +1,80 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ──────────────────────────────────────────────
+# Dev Overlay
+# - 1 replica (save resources)
+# - Debug logging for troubleshooting
+# - Smaller resource limits
+# - Relaxed PDB (minAvailable: 0 — single replica)
+# ──────────────────────────────────────────────
+
+namespace: app
+
+resources:
+  - ../../apps/sample-api
+
+commonLabels:
+  environment: dev
+
+patches:
+  # Scale down to 1 replica
+  - target:
+      kind: Deployment
+      name: sample-api
+    patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sample-api
+      spec:
+        replicas: 1
+        template:
+          spec:
+            containers:
+              - name: sample-api
+                resources:
+                  requests:
+                    cpu: 25m
+                    memory: 32Mi
+                  limits:
+                    cpu: 100m
+                    memory: 128Mi
+
+  # HPA: scale 1–3 in dev
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: sample-api
+    patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: sample-api
+      spec:
+        minReplicas: 1
+        maxReplicas: 3
+
+  # PDB: allow full disruption in dev (single replica)
+  - target:
+      kind: PodDisruptionBudget
+      name: sample-api
+    patch: |
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: sample-api
+      spec:
+        minAvailable: 0
+
+  # ConfigMap: debug logging
+  - target:
+      kind: ConfigMap
+      name: sample-api-config
+    patch: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: sample-api-config
+      data:
+        APP_ENV: "dev"
+        LOG_LEVEL: "debug"
