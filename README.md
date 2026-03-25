@@ -1,12 +1,12 @@
 # kubestack-ref
 
+> **[View Project Showcase →](https://vishwassharma98499.github.io/kubestack-ref)**
+
 [![CI](https://github.com/vishwassharma98499/kubestack-ref/actions/workflows/ci.yml/badge.svg)](https://github.com/vishwassharma98499/kubestack-ref/actions/workflows/ci.yml)
 [![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.6-623CE4?logo=terraform)](https://www.terraform.io/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.29-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vishwassharma98499/kubestack-ref)
-[![Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?logo=github)](https://vishwassharma98499.github.io/kubestack-ref)
 
 > **First-time setup:** Replace all `vishwassharma98499` placeholders with your GitHub username:
 > ```bash
