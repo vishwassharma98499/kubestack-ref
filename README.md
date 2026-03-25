@@ -6,6 +6,7 @@
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vishwassharma98499/kubestack-ref)
+[![Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?logo=github)](https://vishwassharma98499.github.io/kubestack-ref)
 
 > **First-time setup:** Replace all `vishwassharma98499` placeholders with your GitHub username:
 > ```bash
